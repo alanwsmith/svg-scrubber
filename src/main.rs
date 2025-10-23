@@ -11,7 +11,7 @@ use walkdir::WalkDir;
 fn main() {
   println!("Hello, world!");
   let in_dir = PathBuf::from(
-    "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs-raw",
+    "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs-raw-notes",
   );
   let out_dir = PathBuf::from(
     "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs",
@@ -31,6 +31,9 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
   let mut reader = Reader::from_str(&content);
   reader.config_mut().trim_text(true);
   let mut writer = Writer::new(Cursor::new(Vec::new()));
+
+  let mut editTitle = false;
+  let mut editDesc = false;
 
   loop {
     match reader.read_event() {
@@ -53,9 +56,23 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
       }
 
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"title" => {
+        editTitle = true;
         e.clear_attributes();
         assert!(writer.write_event(Event::Start(e)).is_ok());
       }
+
+      Ok(Event::Text(mut e)) if editTitle => {
+        // TODO: Update th title here
+        editTitle = false;
+      }
+
+      Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {
+        editDesc = true;
+      }
+      Ok(Event::Text(mut e)) if editDesc => {
+        editDesc = false;
+      }
+      Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {}
 
       // Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {}
       // Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {}
