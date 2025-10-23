@@ -1,6 +1,7 @@
 #![allow(unused)]
 use anyhow::Result;
-use std::path::PathBuf;
+use regex::Regex;
+use std::{fs, path::Path, path::PathBuf};
 use walkdir::WalkDir;
 
 fn main() {
@@ -14,12 +15,25 @@ fn main() {
   let extensions = vec!["svg"];
   let paths =
     make_copy_paths_list(&in_dir, &out_dir, &extensions).unwrap();
-  dbg!(paths);
+
+  paths.iter().for_each(|pair| {
+    let scrubbed = scrub_svg(&pair.0).unwrap();
+    write_file_with_mkdir(&pair.1, &scrubbed);
+  });
+}
+
+pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
+  let mut content = fs::read_to_string(in_path)?;
+  // let updates = vec![(Regex::new(r#"<\?.*?\?>"#).unwrap(), "")];
+  // updates.iter().for_each(|update| {
+  //   update.0.replace_all(&content, update.1);
+  // });
+  Ok(content)
 }
 
 pub fn make_copy_paths_list(
   in_dir: &PathBuf,
-  out_dir: &PathBuf,
+  out_dir: &Path,
   extensions: &Vec<&str>,
 ) -> Result<Vec<(PathBuf, PathBuf)>> {
   Ok(
@@ -47,4 +61,15 @@ pub fn make_copy_paths_list(
       })
       .collect(),
   )
+}
+
+pub fn write_file_with_mkdir(
+  output_path: &PathBuf,
+  content: &str,
+) -> Result<()> {
+  if let Some(parent_dir) = output_path.parent() {
+    std::fs::create_dir_all(parent_dir)?;
+  }
+  std::fs::write(output_path, content)?;
+  Ok(())
 }
