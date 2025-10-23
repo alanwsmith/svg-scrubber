@@ -10,7 +10,7 @@ use std::{fs, path::Path, path::PathBuf};
 use walkdir::WalkDir;
 
 fn main() {
-  println!("Hello, world!");
+  println!("Starting...");
   let in_dir = PathBuf::from(
     "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs-raw-notes",
   );
@@ -25,6 +25,7 @@ fn main() {
     let scrubbed = scrub_svg(&pair.0).unwrap();
     write_file_with_mkdir(&pair.1, &scrubbed);
   });
+  println!("Done");
 }
 
 pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
@@ -47,8 +48,6 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
             let check_it = String::from_utf8_lossy(a.key.0);
             if to_move.contains(&check_it.to_string().as_str()) {
               elem.push_attribute(a);
-            } else {
-              //dbg!(check_it);
             }
           }
           ()
@@ -127,13 +126,15 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
         editTitle = false;
       }
 
-      // Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {
-      //   editDesc = true;
-      // }
-      // Ok(Event::Text(mut e)) if editDesc => {
-      //   editDesc = false;
-      // }
-      // Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {}
+      Ok(Event::Empty(e)) if e.name().as_ref() == b"desc" => {}
+
+      // Remove the description and it's text if there is
+      Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {
+        editDesc = true;
+      }
+      Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {
+        editDesc = false;
+      }
 
       // Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {}
       // Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {}
@@ -169,7 +170,11 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
 
       Ok(Event::Eof) => break,
 
-      Ok(e) => assert!(writer.write_event(e).is_ok()),
+      Ok(e) => {
+        if !editDesc && !editTitle {
+          assert!(writer.write_event(e).is_ok())
+        }
+      }
 
       Err(e) => panic!(
         "Error at position {}: {:?}",

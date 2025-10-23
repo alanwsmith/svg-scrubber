@@ -1,24 +1,25 @@
 :root {
-  --backup-note-path-stroke: black;
-  --backup-note-circle-fill: black;
-  --backup-note-circle-stroke: black;
+  --backup-svg-note-default-stroke-color: black;
+  --backup-svg-note-default-fill-color: black;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --backup-note-path-stroke: white;
-    --backup-note-circle-fill: white;
-    --backup-note-circle-stroke: white;
+    --backup-svg-note-default-stroke-color: white;
+    --backup-svg-note-default-fill-color: white;
   }
 }
 
 path {
-  stroke: var(--color-primary, var(--backup-note-path-stroke));
+  stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
   fill: none;
 }
 
 circle {
-  stroke: var(--color-primary, var(--backup-note-circle-stroke));
-  fill: var(--color-primary, var(--backup-note-circle-fill));
+  /*
+  stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
+  */
+  stroke: none;
+  fill: var(--svg-note-default-fill-color, var(--backup-svg-note-default-fill-color));
 }
 
