@@ -1,0 +1,27 @@
+:root {
+  --backup-svg-note-default-stroke-color: black;
+  --backup-svg-note-default-fill-color: black;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --backup-svg-note-default-stroke-color: white;
+    --backup-svg-note-default-fill-color: white;
+  }
+}
+
+path {
+  stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+circle {
+  /*
+  stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
+  */
+  stroke: none;
+  fill: var(--svg-note-default-fill-color, var(--backup-svg-note-default-fill-color));
+}
+

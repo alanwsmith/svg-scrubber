@@ -1,7 +1,7 @@
 #![allow(unused)]
 use anyhow::Result;
 use quick_xml::events::attributes::Attribute;
-use quick_xml::events::{BytesEnd, BytesStart, Event};
+use quick_xml::events::{BytesCData, BytesEnd, BytesStart, Event};
 use quick_xml::reader::Reader;
 use quick_xml::writer::Writer;
 use regex::Regex;
@@ -10,7 +10,7 @@ use std::{fs, path::Path, path::PathBuf};
 use walkdir::WalkDir;
 
 fn main() {
-  println!("Hello, world!");
+  println!("Starting...");
   let in_dir = PathBuf::from(
     "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs-raw-notes",
   );
@@ -21,10 +21,11 @@ fn main() {
   let paths =
     make_copy_paths_list(&in_dir, &out_dir, &extensions).unwrap();
   paths.iter().for_each(|pair| {
-    dbg!(&pair);
+    // dbg!(&pair);
     let scrubbed = scrub_svg(&pair.0).unwrap();
     write_file_with_mkdir(&pair.1, &scrubbed);
   });
+  println!("Done");
 }
 
 pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
@@ -33,41 +34,48 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
   reader.config_mut().trim_text(true);
   let mut writer = Writer::new(Cursor::new(Vec::new()));
 
-  let mut editTitle = false;
-  let mut editDesc = false;
+  let mut remove_content = false;
 
   loop {
     match reader.read_event() {
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"svg" => {
         let mut elem = BytesStart::new("svg");
         let to_move =
-          vec!["width", "height", "version", "viewBox", "xmlns"];
-        e.attributes().into_iter().for_each(|attr| {
+          ["width", "height", "version", "viewBox", "xmlns"];
+        e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
             if to_move.contains(&check_it.to_string().as_str()) {
               elem.push_attribute(a);
-            } else {
-              dbg!(check_it);
             }
           }
-          ()
         });
-        let new_stroke = Attribute::from(("stroke", "#ffff00"));
-        elem.push_attribute(new_stroke);
         assert!(writer.write_event(Event::Start(elem)).is_ok());
+
+        let mut style_start = BytesStart::new("style");
+        assert!(
+          writer.write_event(Event::Start(style_start)).is_ok()
+        );
+        let mut cdata = BytesCData::new(include_str!("styles.css"));
+        assert!(writer.write_event(Event::CData(cdata)).is_ok());
+        let mut style_end = BytesEnd::new("style");
+        assert!(writer.write_event(Event::End(style_end)).is_ok());
+      }
+
+      Ok(Event::Empty(mut e)) if e.name().as_ref() == b"defs" => {
+        let mut defs_start = BytesStart::new("defs");
+        assert!(
+          writer.write_event(Event::Start(defs_start)).is_ok()
+        );
+
+        let mut defs_end = BytesEnd::new("defs");
+        assert!(writer.write_event(Event::End(defs_end)).is_ok());
       }
 
       Ok(Event::Empty(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
-        let to_move = vec![
-          "fill",
-          "stroke-width",
-          "stroke-linecap",
-          "stroke-linejoin",
-          "d",
-        ];
-        e.attributes().into_iter().for_each(|attr| {
+        let to_move = ["stroke-width", "d"];
+        e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
             if to_move.contains(&check_it.to_string().as_str()) {
@@ -80,14 +88,13 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
 
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
-        let to_move = vec![
-          "fill",
+        let to_move = [
           "stroke-width",
           "stroke-linecap",
           "stroke-linejoin",
           "d",
         ];
-        e.attributes().into_iter().for_each(|attr| {
+        e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
             if to_move.contains(&check_it.to_string().as_str()) {
@@ -98,27 +105,32 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
         assert!(writer.write_event(Event::Start(elem)).is_ok());
       }
 
+      Ok(Event::Empty(e)) if e.name().as_ref() == b"title" => {}
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"title" => {
-        editTitle = true;
+        remove_content = true;
         e.clear_attributes();
         assert!(writer.write_event(Event::Start(e)).is_ok());
       }
-
-      Ok(Event::Text(mut e)) if editTitle => {
-        // TODO: Update the title here
-        editTitle = false;
+      Ok(Event::End(e)) if e.name().as_ref() == b"title" => {
+        remove_content = false;
+        assert!(writer.write_event(Event::End(e)).is_ok());
       }
 
-      // Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {
-      //   editDesc = true;
-      // }
-      // Ok(Event::Text(mut e)) if editDesc => {
-      //   editDesc = false;
-      // }
-      // Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {}
+      Ok(Event::Empty(e)) if e.name().as_ref() == b"desc" => {}
+      Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {
+        remove_content = true;
+      }
+      Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {
+        remove_content = false;
+      }
 
-      // Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {}
-      // Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {}
+      Ok(Event::Empty(e)) if e.name().as_ref() == b"defs" => {}
+      Ok(Event::Start(e)) if e.name().as_ref() == b"defs" => {
+        remove_content = true;
+      }
+      Ok(Event::End(e)) if e.name().as_ref() == b"defs" => {
+        remove_content = false;
+      }
 
       //Ok(Event::Start(e)) if e.name().as_ref() == b"title" => {
       //   // let mut elem = BytesStart::new("my_elem");
@@ -137,13 +149,6 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
       //   elem.push_attribute(("my-key", "some value"));
       //   assert!(writer.write_event(Event::Start(elem)).is_ok());
       // }
-      // Ok(Event::End(e)) if e.name().as_ref() == b"this_tag" => {
-      //   assert!(
-      //     writer
-      //       .write_event(Event::End(BytesEnd::new("my_elem")))
-      //       .is_ok()
-      //   );
-      // }
       Ok(Event::Comment(_)) => {}
 
       Ok(Event::Empty(e))
@@ -151,7 +156,11 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
 
       Ok(Event::Eof) => break,
 
-      Ok(e) => assert!(writer.write_event(e).is_ok()),
+      Ok(e) => {
+        if !remove_content {
+          assert!(writer.write_event(e).is_ok())
+        }
+      }
 
       Err(e) => panic!(
         "Error at position {}: {:?}",
