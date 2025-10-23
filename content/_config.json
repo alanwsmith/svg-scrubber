@@ -1,0 +1,10 @@
+{
+  "site": {
+    "description": "the tool I use to prep SVGs for my site",
+    "domain_without_trailing_slash": "svg-scrubber.alanwsmith.com",
+    "favicon_root": "/favicons",
+    "github_url": "https://github.com/alanwsmith/svg-scrubber",
+    "og_image_rel_path": "/images/og-image.jpg",
+    "title": "SVG Scrubber"
+  }
+}
