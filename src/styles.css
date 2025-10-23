@@ -13,6 +13,8 @@
 path {
   stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
   fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 circle {

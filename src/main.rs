@@ -34,27 +34,22 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
   reader.config_mut().trim_text(true);
   let mut writer = Writer::new(Cursor::new(Vec::new()));
 
-  let mut editTitle = false;
-  let mut editDesc = false;
+  let mut remove_content = false;
 
   loop {
     match reader.read_event() {
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"svg" => {
         let mut elem = BytesStart::new("svg");
         let to_move =
-          vec!["width", "height", "version", "viewBox", "xmlns"];
-        e.attributes().into_iter().for_each(|attr| {
+          ["width", "height", "version", "viewBox", "xmlns"];
+        e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
             if to_move.contains(&check_it.to_string().as_str()) {
               elem.push_attribute(a);
             }
           }
-          ()
         });
-        // let new_stroke = Attribute::from(("stroke", "#ffff00"));
-        // elem.push_attribute(new_stroke);
-
         assert!(writer.write_event(Event::Start(elem)).is_ok());
 
         let mut style_start = BytesStart::new("style");
@@ -79,13 +74,8 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
 
       Ok(Event::Empty(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
-        let to_move = vec![
-          "stroke-width",
-          "stroke-linecap",
-          "stroke-linejoin",
-          "d",
-        ];
-        e.attributes().into_iter().for_each(|attr| {
+        let to_move = ["stroke-width", "d"];
+        e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
             if to_move.contains(&check_it.to_string().as_str()) {
@@ -98,13 +88,13 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
 
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
-        let to_move = vec![
+        let to_move = [
           "stroke-width",
           "stroke-linecap",
           "stroke-linejoin",
           "d",
         ];
-        e.attributes().into_iter().for_each(|attr| {
+        e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
             if to_move.contains(&check_it.to_string().as_str()) {
@@ -117,21 +107,29 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
 
       Ok(Event::Empty(e)) if e.name().as_ref() == b"title" => {}
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"title" => {
-        editTitle = true;
+        remove_content = true;
         e.clear_attributes();
         assert!(writer.write_event(Event::Start(e)).is_ok());
       }
       Ok(Event::End(e)) if e.name().as_ref() == b"title" => {
-        editTitle = false;
+        remove_content = false;
         assert!(writer.write_event(Event::End(e)).is_ok());
       }
 
       Ok(Event::Empty(e)) if e.name().as_ref() == b"desc" => {}
       Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {
-        editDesc = true;
+        remove_content = true;
       }
       Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {
-        editDesc = false;
+        remove_content = false;
+      }
+
+      Ok(Event::Empty(e)) if e.name().as_ref() == b"defs" => {}
+      Ok(Event::Start(e)) if e.name().as_ref() == b"defs" => {
+        remove_content = true;
+      }
+      Ok(Event::End(e)) if e.name().as_ref() == b"defs" => {
+        remove_content = false;
       }
 
       //Ok(Event::Start(e)) if e.name().as_ref() == b"title" => {
@@ -159,7 +157,7 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
       Ok(Event::Eof) => break,
 
       Ok(e) => {
-        if !editDesc && !editTitle {
+        if !remove_content {
           assert!(writer.write_event(e).is_ok())
         }
       }
