@@ -49,14 +49,16 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
           }
           ()
         });
-
-        // e.clear_attributes();
-        // original_attrs
-        //   .into_iter()
-        //   .for_each(|a| e.push_attribute(a.unwrap()));
-
         assert!(writer.write_event(Event::Start(elem)).is_ok());
       }
+
+      Ok(Event::Start(mut e)) if e.name().as_ref() == b"title" => {
+        e.clear_attributes();
+        assert!(writer.write_event(Event::Start(e)).is_ok());
+      }
+
+      // Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {}
+      // Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {}
 
       //Ok(Event::Start(e)) if e.name().as_ref() == b"title" => {
       //   // let mut elem = BytesStart::new("my_elem");
