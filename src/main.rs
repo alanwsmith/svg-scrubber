@@ -115,29 +115,24 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
         assert!(writer.write_event(Event::Start(elem)).is_ok());
       }
 
+      Ok(Event::Empty(e)) if e.name().as_ref() == b"title" => {}
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"title" => {
         editTitle = true;
         e.clear_attributes();
         assert!(writer.write_event(Event::Start(e)).is_ok());
       }
-
-      Ok(Event::Text(mut e)) if editTitle => {
-        // TODO: Update the title here
+      Ok(Event::End(e)) if e.name().as_ref() == b"title" => {
         editTitle = false;
+        assert!(writer.write_event(Event::End(e)).is_ok());
       }
 
       Ok(Event::Empty(e)) if e.name().as_ref() == b"desc" => {}
-
-      // Remove the description and it's text if there is
       Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {
         editDesc = true;
       }
       Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {
         editDesc = false;
       }
-
-      // Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {}
-      // Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {}
 
       //Ok(Event::Start(e)) if e.name().as_ref() == b"title" => {
       //   // let mut elem = BytesStart::new("my_elem");
@@ -155,13 +150,6 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
       //   );
       //   elem.push_attribute(("my-key", "some value"));
       //   assert!(writer.write_event(Event::Start(elem)).is_ok());
-      // }
-      // Ok(Event::End(e)) if e.name().as_ref() == b"this_tag" => {
-      //   assert!(
-      //     writer
-      //       .write_event(Event::End(BytesEnd::new("my_elem")))
-      //       .is_ok()
-      //   );
       // }
       Ok(Event::Comment(_)) => {}
 
