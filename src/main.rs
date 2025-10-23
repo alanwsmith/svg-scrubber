@@ -1,5 +1,6 @@
 #![allow(unused)]
 use anyhow::Result;
+use quick_xml::events::attributes::Attribute;
 use quick_xml::events::{BytesEnd, BytesStart, Event};
 use quick_xml::reader::Reader;
 use quick_xml::writer::Writer;
@@ -19,8 +20,8 @@ fn main() {
   let extensions = vec!["svg"];
   let paths =
     make_copy_paths_list(&in_dir, &out_dir, &extensions).unwrap();
-
   paths.iter().for_each(|pair| {
+    dbg!(&pair);
     let scrubbed = scrub_svg(&pair.0).unwrap();
     write_file_with_mkdir(&pair.1, &scrubbed);
   });
@@ -52,6 +53,48 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
           }
           ()
         });
+        let new_stroke = Attribute::from(("stroke", "#ffff00"));
+        elem.push_attribute(new_stroke);
+        assert!(writer.write_event(Event::Start(elem)).is_ok());
+      }
+
+      Ok(Event::Empty(mut e)) if e.name().as_ref() == b"path" => {
+        let mut elem = BytesStart::new("path");
+        let to_move = vec![
+          "fill",
+          "stroke-width",
+          "stroke-linecap",
+          "stroke-linejoin",
+          "d",
+        ];
+        e.attributes().into_iter().for_each(|attr| {
+          if let Ok(a) = attr {
+            let check_it = String::from_utf8_lossy(a.key.0);
+            if to_move.contains(&check_it.to_string().as_str()) {
+              elem.push_attribute(a);
+            }
+          }
+        });
+        assert!(writer.write_event(Event::Empty(elem)).is_ok());
+      }
+
+      Ok(Event::Start(mut e)) if e.name().as_ref() == b"path" => {
+        let mut elem = BytesStart::new("path");
+        let to_move = vec![
+          "fill",
+          "stroke-width",
+          "stroke-linecap",
+          "stroke-linejoin",
+          "d",
+        ];
+        e.attributes().into_iter().for_each(|attr| {
+          if let Ok(a) = attr {
+            let check_it = String::from_utf8_lossy(a.key.0);
+            if to_move.contains(&check_it.to_string().as_str()) {
+              elem.push_attribute(a);
+            }
+          }
+        });
         assert!(writer.write_event(Event::Start(elem)).is_ok());
       }
 
@@ -62,17 +105,17 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
       }
 
       Ok(Event::Text(mut e)) if editTitle => {
-        // TODO: Update th title here
+        // TODO: Update the title here
         editTitle = false;
       }
 
-      Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {
-        editDesc = true;
-      }
-      Ok(Event::Text(mut e)) if editDesc => {
-        editDesc = false;
-      }
-      Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {}
+      // Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {
+      //   editDesc = true;
+      // }
+      // Ok(Event::Text(mut e)) if editDesc => {
+      //   editDesc = false;
+      // }
+      // Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {}
 
       // Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {}
       // Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {}
@@ -85,32 +128,31 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
       //   // elem.push_attribute(("my-key", "some value"));
       //   assert!(writer.write_event(Event::Start(e)).is_ok());
       // }
-      Ok(Event::Start(e)) if e.name().as_ref() == b"this_tag" => {
-        let mut elem = BytesStart::new("my_elem");
-        elem.extend_attributes(
-          e.attributes().map(|attr| attr.unwrap()),
-        );
-        elem.push_attribute(("my-key", "some value"));
-        assert!(writer.write_event(Event::Start(elem)).is_ok());
-      }
-      Ok(Event::End(e)) if e.name().as_ref() == b"this_tag" => {
-        assert!(
-          writer
-            .write_event(Event::End(BytesEnd::new("my_elem")))
-            .is_ok()
-        );
-      }
+
+      // Ok(Event::Start(e)) if e.name().as_ref() == b"this_tag" => {
+      //   let mut elem = BytesStart::new("my_elem");
+      //   elem.extend_attributes(
+      //     e.attributes().map(|attr| attr.unwrap()),
+      //   );
+      //   elem.push_attribute(("my-key", "some value"));
+      //   assert!(writer.write_event(Event::Start(elem)).is_ok());
+      // }
+      // Ok(Event::End(e)) if e.name().as_ref() == b"this_tag" => {
+      //   assert!(
+      //     writer
+      //       .write_event(Event::End(BytesEnd::new("my_elem")))
+      //       .is_ok()
+      //   );
+      // }
       Ok(Event::Comment(_)) => {}
+
       Ok(Event::Empty(e))
         if e.name().as_ref() == b"sodipodi:namedview" => {}
-      // Ok(Event::Empty(e)) => {
-      //   dbg!(e);
-      // }
+
       Ok(Event::Eof) => break,
-      // Ok(Event::Start(e)) if e.name().as_ref() != b"path" => {
-      //   dbg!(&e);
-      // }
+
       Ok(e) => assert!(writer.write_event(e).is_ok()),
+
       Err(e) => panic!(
         "Error at position {}: {:?}",
         reader.error_position(),
