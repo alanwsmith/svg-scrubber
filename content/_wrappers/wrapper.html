@@ -1,60 +1,43 @@
-[!- set page_title = "This Website Needs A Name" -!]
-
-[!- set domain_no_trailing_slash = "www.alanwsmith.com" -!]
-
-[!- set description -!]
-A new website that hopefully does something cool, but doesn't have a name yet. 
-[!- endset -!]
-
-[!- set favicon_root = "/favicons" -!]
-
-[!- set og_url -!]
-https://[@ domain_no_trailing_slash @]/
-[!- endset -!]
-
-[!- set og_image -!]
-https://[@ domain_no_trailing_slash @]/images/og-image.jpg
-[!- endset -!]
-
-[#-
-[!- set github_source = "https://github.com/alanwsmith/" -!]
--#]
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     [! include "_wrappers/support/head-tag-content.html" !]
     
     <style>
+    :root { --load-hider: 0; }
+    .load-hider { opacity: var(--load-hider); }
     [! include "styles/_base.css" !]
     [! include "styles/_custom.css" !]
     </style>
 
     <script>
       setTimeout(() => { 
-        document.documentElement.style.setProperty("--load-hider", "visible");
+        document.documentElement.style.setProperty("--load-hider", "1");
       }, 1100);
 
-[! include "_includes/script.js" !]
+[! include "_includes/bitty-functions.js" !]
+[! include "_includes/bitty-class.js" !]
     </script>
 
+    <script src="/components/bitty-3.0.0-rc1.full.js" type="module"></script>
   </head>
   <body>
-    <bitty-3-0 class="load-hider">
-      <noscript>
-        <p>
-          NOTE: This site use JavaScript which appears to be turned off. 
-          Most content will be fine, but some things won't work.
-        </p>
-        <style>:root { --load-hider: visible; }</style>
-      </noscript>
+    <noscript>
+      <p>
+        NOTE: This site use JavaScript which appears to be turned off. 
+        Most content will be fine, but some things won't work.
+      </p>
+      <style>:root { --load-hider: 1; }</style>
+    </noscript>
+
+    <bitty-3-0 class="load-hider content-wrapper">
 
       <header class="default-wrapper xlarge-bottom-margin">
         <div class="small-font">
           from <a href="https://www.alanwsmith.com/">alan w smith</a> ~
           [@- ' ' -@]
-          [!- if github_source  -!]
-            <a href="[@ github_source @]">source</a> ~
+          [!- if data['_config.json'].site.github_url -!]
+            <a href="[@ data['_config.json'].site.github_url @]">source</a> ~
           [!- endif -!]
           [@- ' ' -@]
           <a href="https://socials.alanwsmith.com/">socials</a> ~
@@ -62,9 +45,9 @@ https://[@ domain_no_trailing_slash @]/images/og-image.jpg
           <a href="https://www.alanwsmith.com/feeds/posts.xml">rss</a>
         </div>
         <hgroup class="large-top-margin">
-          <h1>A New Site</h1>
+          <h1>SVG Scrubber</h1>
           <div class="small-font accent-bottom-border">
-            With a subtitle
+            get 'em ready to go
           </div>
         </hgroup>
       </header>
@@ -78,8 +61,8 @@ https://[@ domain_no_trailing_slash @]/images/og-image.jpg
           <div>
           from <a href="https://www.alanwsmith.com/">alan w smith</a>
           </div>
-          [!- if github_source -!]
-            <a href="[@ github_source @]">source</a> ~
+          [!- if data['_config.json'].site.github_url -!]
+            <a href="[@ data['_config.json'].site.github_url @]">source</a> ~
             [@- ' ' -@]
           [!- endif -!]
           <a href="https://socials.alanwsmith.com/">socials</a> ~
@@ -89,6 +72,6 @@ https://[@ domain_no_trailing_slash @]/images/og-image.jpg
       </footer>
     </bitty-3-0>
 
-    <script src="/components/bitty-3.0.0-rc1.full.js" type="module"></script>
   </body>
 </html>
+

@@ -9,3 +9,8 @@ venv
 
 # Local Netlify folder
 .netlify
+
+
+# Added by cargo
+
+/target
