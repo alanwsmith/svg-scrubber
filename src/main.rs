@@ -1,6 +1,10 @@
 #![allow(unused)]
 use anyhow::Result;
+use quick_xml::events::{BytesEnd, BytesStart, Event};
+use quick_xml::reader::Reader;
+use quick_xml::writer::Writer;
 use regex::Regex;
+use std::io::Cursor;
 use std::{fs, path::Path, path::PathBuf};
 use walkdir::WalkDir;
 
@@ -24,11 +28,85 @@ fn main() {
 
 pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
   let mut content = fs::read_to_string(in_path)?;
+  let mut reader = Reader::from_str(&content);
+  reader.config_mut().trim_text(true);
+  let mut writer = Writer::new(Cursor::new(Vec::new()));
+
+  loop {
+    match reader.read_event() {
+      Ok(Event::Start(mut e)) if e.name().as_ref() == b"svg" => {
+        let mut elem = BytesStart::new("svg");
+        let to_move =
+          vec!["width", "height", "version", "viewBox", "xmlns"];
+        e.attributes().into_iter().for_each(|attr| {
+          if let Ok(a) = attr {
+            let check_it = String::from_utf8_lossy(a.key.0);
+            if to_move.contains(&check_it.to_string().as_str()) {
+              elem.push_attribute(a);
+            } else {
+              dbg!(check_it);
+            }
+          }
+          ()
+        });
+
+        // e.clear_attributes();
+        // original_attrs
+        //   .into_iter()
+        //   .for_each(|a| e.push_attribute(a.unwrap()));
+
+        assert!(writer.write_event(Event::Start(elem)).is_ok());
+      }
+
+      //Ok(Event::Start(e)) if e.name().as_ref() == b"title" => {
+      //   // let mut elem = BytesStart::new("my_elem");
+      //   // elem.extend_attributes(
+      //   //   e.attributes().map(|attr| attr.unwrap()),
+      //   // );
+      //   // elem.push_attribute(("my-key", "some value"));
+      //   assert!(writer.write_event(Event::Start(e)).is_ok());
+      // }
+      Ok(Event::Start(e)) if e.name().as_ref() == b"this_tag" => {
+        let mut elem = BytesStart::new("my_elem");
+        elem.extend_attributes(
+          e.attributes().map(|attr| attr.unwrap()),
+        );
+        elem.push_attribute(("my-key", "some value"));
+        assert!(writer.write_event(Event::Start(elem)).is_ok());
+      }
+      Ok(Event::End(e)) if e.name().as_ref() == b"this_tag" => {
+        assert!(
+          writer
+            .write_event(Event::End(BytesEnd::new("my_elem")))
+            .is_ok()
+        );
+      }
+      Ok(Event::Comment(_)) => {}
+      Ok(Event::Empty(e))
+        if e.name().as_ref() == b"sodipodi:namedview" => {}
+      // Ok(Event::Empty(e)) => {
+      //   dbg!(e);
+      // }
+      Ok(Event::Eof) => break,
+      // Ok(Event::Start(e)) if e.name().as_ref() != b"path" => {
+      //   dbg!(&e);
+      // }
+      Ok(e) => assert!(writer.write_event(e).is_ok()),
+      Err(e) => panic!(
+        "Error at position {}: {:?}",
+        reader.error_position(),
+        e
+      ),
+    }
+  }
+  let result = writer.into_inner().into_inner();
+  let output = String::from_utf8_lossy(&result).to_string();
+
   // let updates = vec![(Regex::new(r#"<\?.*?\?>"#).unwrap(), "")];
   // updates.iter().for_each(|update| {
   //   update.0.replace_all(&content, update.1);
   // });
-  Ok(content)
+  Ok(output)
 }
 
 pub fn make_copy_paths_list(
