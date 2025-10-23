@@ -1,7 +1,7 @@
 #![allow(unused)]
 use anyhow::Result;
 use quick_xml::events::attributes::Attribute;
-use quick_xml::events::{BytesEnd, BytesStart, Event};
+use quick_xml::events::{BytesCData, BytesEnd, BytesStart, Event};
 use quick_xml::reader::Reader;
 use quick_xml::writer::Writer;
 use regex::Regex;
@@ -21,7 +21,7 @@ fn main() {
   let paths =
     make_copy_paths_list(&in_dir, &out_dir, &extensions).unwrap();
   paths.iter().for_each(|pair| {
-    dbg!(&pair);
+    // dbg!(&pair);
     let scrubbed = scrub_svg(&pair.0).unwrap();
     write_file_with_mkdir(&pair.1, &scrubbed);
   });
@@ -48,20 +48,39 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
             if to_move.contains(&check_it.to_string().as_str()) {
               elem.push_attribute(a);
             } else {
-              dbg!(check_it);
+              //dbg!(check_it);
             }
           }
           ()
         });
-        let new_stroke = Attribute::from(("stroke", "#ffff00"));
-        elem.push_attribute(new_stroke);
+        // let new_stroke = Attribute::from(("stroke", "#ffff00"));
+        // elem.push_attribute(new_stroke);
+
         assert!(writer.write_event(Event::Start(elem)).is_ok());
+
+        let mut style_start = BytesStart::new("style");
+        assert!(
+          writer.write_event(Event::Start(style_start)).is_ok()
+        );
+        let mut cdata = BytesCData::new(include_str!("styles.css"));
+        assert!(writer.write_event(Event::CData(cdata)).is_ok());
+        let mut style_end = BytesEnd::new("style");
+        assert!(writer.write_event(Event::End(style_end)).is_ok());
+      }
+
+      Ok(Event::Empty(mut e)) if e.name().as_ref() == b"defs" => {
+        let mut defs_start = BytesStart::new("defs");
+        assert!(
+          writer.write_event(Event::Start(defs_start)).is_ok()
+        );
+
+        let mut defs_end = BytesEnd::new("defs");
+        assert!(writer.write_event(Event::End(defs_end)).is_ok());
       }
 
       Ok(Event::Empty(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
         let to_move = vec![
-          "fill",
           "stroke-width",
           "stroke-linecap",
           "stroke-linejoin",
@@ -81,7 +100,6 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
         let to_move = vec![
-          "fill",
           "stroke-width",
           "stroke-linecap",
           "stroke-linejoin",

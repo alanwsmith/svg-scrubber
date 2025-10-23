@@ -1,0 +1,24 @@
+:root {
+  --backup-note-path-stroke: black;
+  --backup-note-circle-fill: black;
+  --backup-note-circle-stroke: black;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --backup-note-path-stroke: white;
+    --backup-note-circle-fill: white;
+    --backup-note-circle-stroke: white;
+  }
+}
+
+path {
+  stroke: var(--color-primary, var(--backup-note-path-stroke));
+  fill: none;
+}
+
+circle {
+  stroke: var(--color-primary, var(--backup-note-circle-stroke));
+  fill: var(--color-primary, var(--backup-note-circle-fill));
+}
+
