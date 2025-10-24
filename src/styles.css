@@ -1,10 +1,10 @@
-:root {
+#SVG_ID {
   --backup-svg-note-default-stroke-color: black;
   --backup-svg-note-default-fill-color: black;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  #SVG_ID {
     --backup-svg-note-default-stroke-color: white;
     --backup-svg-note-default-fill-color: white;
   }

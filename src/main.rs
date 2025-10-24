@@ -7,6 +7,7 @@ use quick_xml::writer::Writer;
 use regex::Regex;
 use std::io::Cursor;
 use std::{fs, path::Path, path::PathBuf};
+use uuid::Uuid;
 use walkdir::WalkDir;
 
 fn main() {
@@ -35,6 +36,9 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
   let mut reader = Reader::from_str(&content);
   reader.config_mut().trim_text(true);
   let mut writer = Writer::new(Cursor::new(Vec::new()));
+
+  let id = format!("svg-{}", Uuid::new_v4());
+  let styles = include_str!("styles.css").replace("SVG_ID", &id);
 
   let mut remove_content = false;
   let mut styles_added = false;
@@ -67,6 +71,8 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
             }
           }
         });
+        let id_attr = Attribute::from(("id", id.as_str()));
+        elem.push_attribute(id_attr);
         assert!(writer.write_event(Event::Start(elem)).is_ok());
         if !styles_added {
           styles_added = true;
@@ -74,8 +80,7 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
           assert!(
             writer.write_event(Event::Start(style_start)).is_ok()
           );
-          let mut cdata =
-            BytesCData::new(include_str!("styles.css"));
+          let mut cdata = BytesCData::new(&styles);
           assert!(writer.write_event(Event::CData(cdata)).is_ok());
           let mut style_end = BytesEnd::new("style");
           assert!(

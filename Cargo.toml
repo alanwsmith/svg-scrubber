@@ -7,4 +7,5 @@ edition = "2024"
 anyhow = "1.0.100"
 quick-xml = "0.38.3"
 regex = "1.12.2"
+uuid = {version = "1.18.1", features = ["v4"] }
 walkdir = "2.5.0"
