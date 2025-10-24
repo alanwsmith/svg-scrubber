@@ -177,12 +177,11 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
     }
   }
   let result = writer.into_inner().into_inner();
-  let output = String::from_utf8_lossy(&result).to_string();
-
-  // let updates = vec![(Regex::new(r#"<\?.*?\?>"#).unwrap(), "")];
-  // updates.iter().for_each(|update| {
-  //   update.0.replace_all(&content, update.1);
-  // });
+  let mut output = String::from_utf8_lossy(&result).to_string();
+  let updates = vec![(Regex::new(r#"<\?.*?\?>"#).unwrap(), "")];
+  updates.iter().for_each(|update| {
+    output = update.0.replace_all(&output, update.1).to_string();
+  });
   Ok(output)
 }
 
