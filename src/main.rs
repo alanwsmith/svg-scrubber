@@ -7,6 +7,7 @@ use quick_xml::writer::Writer;
 use regex::Regex;
 use std::io::Cursor;
 use std::{fs, path::Path, path::PathBuf};
+use svg_scrubber::sizer::Sizer;
 use uuid::Uuid;
 use walkdir::WalkDir;
 
@@ -32,6 +33,7 @@ fn main() {
 }
 
 pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
+  let mut sizer = Sizer::new();
   let mut content = fs::read_to_string(in_path)?;
   let mut reader = Reader::from_str(&content);
   reader.config_mut().trim_text(true);
@@ -61,16 +63,44 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
 
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"svg" => {
         let mut elem = BytesStart::new("svg");
-        let to_move =
-          ["width", "height", "version", "viewBox", "xmlns"];
+        let to_move = ["version", "xmlns"];
+
         e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
+            let v = String::from_utf8_lossy(&a.value).to_string();
+            if check_it == "width" {
+              sizer.width = Some(v.clone());
+            }
+            if check_it == "height" {
+              sizer.height = Some(v.clone());
+            }
+            if check_it == "viewBox" {
+              sizer.view_box = Some(v.clone());
+            }
             if to_move.contains(&check_it.to_string().as_str()) {
               elem.push_attribute(a);
             }
           }
         });
+
+        dbg!(sizer.f_width());
+        dbg!(sizer.f_height());
+        elem.push_attribute(Attribute::from((
+          "width",
+          sizer.width().as_str(),
+        )));
+
+        elem.push_attribute(Attribute::from((
+          "height",
+          sizer.height().as_str(),
+        )));
+
+        elem.push_attribute(Attribute::from((
+          "viewBox",
+          sizer.view_box().as_str(),
+        )));
+
         let id_attr = Attribute::from(("id", id.as_str()));
         elem.push_attribute(id_attr);
         assert!(writer.write_event(Event::Start(elem)).is_ok());
