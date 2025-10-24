@@ -20,14 +20,24 @@ impl Sizer {
     80.0
   }
 
-  pub fn width(&self) -> String {
+  pub fn svg_width(&self) -> String {
     // format!("{}pt", self.f_width() + self.width_adjust())
     format!("{}pt", self.f_width())
   }
 
-  pub fn height(&self) -> String {
+  pub fn svg_height(&self) -> String {
     //format!("{}pt", self.f_height() + self.height_adjust())
     format!("{}pt", self.f_height())
+  }
+
+  pub fn rect_width(&self) -> String {
+    // format!("{}pt", self.f_width() + self.width_adjust())
+    format!("{}", self.f_width())
+  }
+
+  pub fn rect_height(&self) -> String {
+    //format!("{}pt", self.f_height() + self.height_adjust())
+    format!("{}", self.f_height())
   }
 
   pub fn rect_x(&self) -> String {
