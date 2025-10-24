@@ -1963,6 +1963,7 @@ sup {
 }
 svg {
   max-width: 100%;
+  height: auto;
 }
 table {
   margin: var(--default-margin);
@@ -2026,7 +2027,17 @@ video {
   padding: var(--default-padding);
 }
 
+:root {
+  --svg-note-default-stroke-color: var(--primary-color);
+  --svg-note-default-fill-color: var(--primary-color);
+}
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --svg-note-default-stroke-color: var(--primary-color);
+    --svg-note-default-fill-color: var(--primary-color);
+  }
+}
 
     </style>
 
@@ -2066,6 +2077,14 @@ window.bittyFunctions = {
 };window.BittyClass = class {
   bittyInit() {
     this.api.fn.setProp("--load-hider", "1");
+    this.api.forward(null, "svg");
+  }
+
+  async svg(_event, el) {
+    const newSvg = await this.api.getSVG(
+      "/svgs/output/for-example-this-one.svg",
+    );
+    el.appendChild(newSvg.ok);
   }
 };    </script>
 
@@ -2107,39 +2126,37 @@ window.bittyFunctions = {
   if you want to take a look.
 </p>
 
-<h2>TODO</h2>
+<h2>Example</h2>
+<div data-receive="svg"></div>
+
+<h2>Features</h2>
 <ul>
 <li>
-<p>Added a UUID to each SVG.</p>
+<p>TODO: Updated the title tag with the name of the file</p>
 </li>
 <li>
-<p>Styles are only applied to the UUID
+<p>TODO: Added a UUID to each SVG.</p>
+</li>
+<li>
+<p>TODO: Styles are only applied to the UUID
 for the parent SVG.</p>
 </li>
 <li>
-<p>Only apply the styles to the UUID for the SVG</p>
+<p>TODO: Added padding to viewBox.</p>
 </li>
 <li>
-<p>Remove id attributes.</p>
+<p>TODO:Add an opaque background color.</p>
 </li>
 <li>
-<p>Add padding to viewBox.</p>
+<p>TODO: Read a .txt file with the same
+name and use it as the description
+for the SVG</p>
 </li>
 <li>
-<p>Add an opaque background color.</p>
+<p>Removed cruft attributes from svg element.</p>
 </li>
 <li>
-<p>Replace the boilerplate description with
-something that makes sense.</p>
-</li>
-</ul>
-<h2>Done</h2>
-<ul>
-<li>
-<p>Remove cruft attributes from svg element.</p>
-</li>
-<li>
-<p>Add stylesheet that calls page vars
+<p>Added stylesheet that calls page vars
 with backups for light and dark mode.</p>
 </li>
 <li>
@@ -2147,7 +2164,7 @@ with backups for light and dark mode.</p>
 paths and circles. (tbd on rects)</p>
 </li>
 <li>
-<p>Remove cruft defs tag</p>
+<p>Removed id attribute from the g tag</p>
 </li>
 </ul>
       </main>
