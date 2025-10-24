@@ -14,15 +14,21 @@ impl Sizer {
   }
 
   pub fn width(&self) -> String {
-    "1203pt".to_string()
+    format!("{}pt", self.f_width())
   }
 
   pub fn height(&self) -> String {
-    "281pt".to_string()
+    format!("{}pt", self.f_height())
   }
 
   pub fn view_box(&self) -> String {
-    "-292 558 603 481".to_string()
+    format!(
+      "{} {} {} {}",
+      self.f_vb_min_x(),
+      self.f_vb_min_y(),
+      self.f_vb_width(),
+      self.f_vb_height(),
+    )
   }
 
   pub fn f_width(&self) -> f32 {
@@ -31,6 +37,32 @@ impl Sizer {
 
   pub fn f_height(&self) -> f32 {
     self.float_value(&self.height.as_ref().unwrap())
+  }
+
+  pub fn vb_parts(&self) -> Vec<f32> {
+    self
+      .view_box
+      .as_ref()
+      .unwrap()
+      .split(" ")
+      .map(|n| n.parse::<f32>().unwrap())
+      .collect::<Vec<f32>>()
+  }
+
+  pub fn f_vb_min_x(&self) -> f32 {
+    self.vb_parts()[0]
+  }
+
+  pub fn f_vb_min_y(&self) -> f32 {
+    self.vb_parts()[1]
+  }
+
+  pub fn f_vb_width(&self) -> f32 {
+    self.vb_parts()[2]
+  }
+
+  pub fn f_vb_height(&self) -> f32 {
+    self.vb_parts()[3]
   }
 
   pub fn float_value(

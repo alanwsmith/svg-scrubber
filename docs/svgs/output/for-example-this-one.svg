@@ -1,10 +1,10 @@
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="1203pt" height="281pt" viewBox="-292 558 603 481" id="svg-8de34e03-38c8-49bb-a637-40a70bf15ffd"><style><![CDATA[#svg-8de34e03-38c8-49bb-a637-40a70bf15ffd {
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="603.7828pt" height="481.75534pt" viewBox="-292.613 557.069 603.7828 481.75537" id="svg-90116fe8-b97d-4a85-b543-356b0b7edaaf"><style><![CDATA[#svg-90116fe8-b97d-4a85-b543-356b0b7edaaf {
   --backup-svg-note-default-stroke-color: black;
   --backup-svg-note-default-fill-color: black;
 }
 
 @media (prefers-color-scheme: dark) {
-  #svg-8de34e03-38c8-49bb-a637-40a70bf15ffd {
+  #svg-90116fe8-b97d-4a85-b543-356b0b7edaaf {
     --backup-svg-note-default-stroke-color: white;
     --backup-svg-note-default-fill-color: white;
   }
