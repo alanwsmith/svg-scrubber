@@ -21,20 +21,34 @@ impl Sizer {
   }
 
   pub fn width(&self) -> String {
-    format!("{}pt", self.f_width() + self.width_adjust())
+    // format!("{}pt", self.f_width() + self.width_adjust())
+    format!("{}pt", self.f_width())
   }
 
   pub fn height(&self) -> String {
-    format!("{}pt", self.f_height() + self.height_adjust())
+    //format!("{}pt", self.f_height() + self.height_adjust())
+    format!("{}pt", self.f_height())
+  }
+
+  pub fn rect_x(&self) -> String {
+    format!("{}", self.f_vb_min_x())
+  }
+
+  pub fn rect_y(&self) -> String {
+    format!("{}", self.f_vb_min_y())
   }
 
   pub fn view_box(&self) -> String {
     format!(
       "{} {} {} {}",
-      self.f_vb_min_x() - (self.width_adjust() / 2.0),
-      self.f_vb_min_y() - (self.height_adjust() / 2.0),
-      self.f_vb_width() + self.width_adjust(),
-      self.f_vb_height() + self.height_adjust(),
+      // self.f_vb_min_x() - (self.width_adjust() / 2.0),
+      // self.f_vb_min_y() - (self.height_adjust() / 2.0),
+      // self.f_vb_width() + self.width_adjust(),
+      // self.f_vb_height() + self.height_adjust(),
+      self.f_vb_min_x(),
+      self.f_vb_min_y(),
+      self.f_vb_width(),
+      self.f_vb_height(),
     )
   }
 

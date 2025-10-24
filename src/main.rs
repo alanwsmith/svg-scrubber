@@ -48,6 +48,34 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
   loop {
     match reader.read_event() {
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"g" => {
+        // let mut r_start = BytesStart::new("rect");
+        // r_start.push_attribute(Attribute::from((
+        //   "class",
+        //   "svg-note-background",
+        // )));
+        // r_start.push_attribute(Attribute::from((
+        //   "width",
+        //   sizer.width().as_str(),
+        // )));
+        // r_start.push_attribute(Attribute::from((
+        //   "height",
+        //   sizer.height().as_str(),
+        // )));
+        // r_start.push_attribute(Attribute::from((
+        //   "x",
+        //   sizer.rect_x().as_str(),
+        // )));
+        // r_start.push_attribute(Attribute::from((
+        //   "y",
+        //   sizer.rect_y().as_str(),
+        // )));
+        // // r_start.push_attribute(Attribute::from(("rx", "2%")));
+        // // r_start.push_attribute(Attribute::from(("ry", "2%")));
+        // // r_start.push_attribute(Attribute::from(("fill", "red")));
+        // assert!(writer.write_event(Event::Start(r_start)).is_ok());
+        // let mut r_end = BytesEnd::new("rect");
+        // assert!(writer.write_event(Event::End(r_end)).is_ok());
+
         let mut elem = BytesStart::new("g");
         let to_move = ["transform"];
         e.attributes().for_each(|attr| {
@@ -121,7 +149,7 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
 
       Ok(Event::Empty(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
-        let to_move = ["stroke-width", "d"];
+        let to_move = ["stroke-width", "d", "stroke"];
         e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);

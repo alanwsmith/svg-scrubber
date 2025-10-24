@@ -10,15 +10,16 @@
   }
 }
 
-path {
+#SVG_ID path {
   stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-circle {
+#SVG_ID circle {
   stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
   fill: var(--svg-note-default-fill-color, var(--backup-svg-note-default-fill-color));
 }
+
 
