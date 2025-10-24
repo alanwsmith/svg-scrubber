@@ -13,21 +13,28 @@ impl Sizer {
     }
   }
 
+  pub fn width_adjust(&self) -> f32 {
+    100.0
+  }
+  pub fn height_adjust(&self) -> f32 {
+    80.0
+  }
+
   pub fn width(&self) -> String {
-    format!("{}pt", self.f_width())
+    format!("{}pt", self.f_width() + self.width_adjust())
   }
 
   pub fn height(&self) -> String {
-    format!("{}pt", self.f_height())
+    format!("{}pt", self.f_height() + self.height_adjust())
   }
 
   pub fn view_box(&self) -> String {
     format!(
       "{} {} {} {}",
-      self.f_vb_min_x(),
-      self.f_vb_min_y(),
-      self.f_vb_width(),
-      self.f_vb_height(),
+      self.f_vb_min_x() - (self.width_adjust() / 2.0),
+      self.f_vb_min_y() - (self.height_adjust() / 2.0),
+      self.f_vb_width() + self.width_adjust(),
+      self.f_vb_height() + self.height_adjust(),
     )
   }
 
