@@ -1939,6 +1939,7 @@ sup {
 }
 svg {
   max-width: 100%;
+  height: auto;
 }
 table {
   margin: var(--default-margin);
@@ -2002,6 +2003,16 @@ video {
   padding: var(--default-padding);
 }
 
+:root {
+  --svg-note-default-stroke-color: var(--primary-color);
+  --svg-note-default-fill-color: var(--primary-color);
+}
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --svg-note-default-stroke-color: var(--primary-color);
+    --svg-note-default-fill-color: var(--primary-color);
+  }
+}
 
 

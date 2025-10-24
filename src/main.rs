@@ -12,10 +12,12 @@ use walkdir::WalkDir;
 fn main() {
   println!("Starting...");
   let in_dir = PathBuf::from(
-    "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs-raw-notes",
+    "content/svgs/input",
+    // "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs-raw-notes",
   );
   let out_dir = PathBuf::from(
-    "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs",
+    "content/svgs/output",
+    //"/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs",
   );
   let extensions = vec!["svg"];
   let paths =
@@ -35,9 +37,24 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
   let mut writer = Writer::new(Cursor::new(Vec::new()));
 
   let mut remove_content = false;
+  let mut styles_added = false;
 
   loop {
     match reader.read_event() {
+      Ok(Event::Start(mut e)) if e.name().as_ref() == b"g" => {
+        let mut elem = BytesStart::new("g");
+        let to_move = ["transform"];
+        e.attributes().for_each(|attr| {
+          if let Ok(a) = attr {
+            let check_it = String::from_utf8_lossy(a.key.0);
+            if to_move.contains(&check_it.to_string().as_str()) {
+              elem.push_attribute(a);
+            }
+          }
+        });
+        assert!(writer.write_event(Event::Start(elem)).is_ok());
+      }
+
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"svg" => {
         let mut elem = BytesStart::new("svg");
         let to_move =
@@ -51,25 +68,20 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
           }
         });
         assert!(writer.write_event(Event::Start(elem)).is_ok());
-
-        let mut style_start = BytesStart::new("style");
-        assert!(
-          writer.write_event(Event::Start(style_start)).is_ok()
-        );
-        let mut cdata = BytesCData::new(include_str!("styles.css"));
-        assert!(writer.write_event(Event::CData(cdata)).is_ok());
-        let mut style_end = BytesEnd::new("style");
-        assert!(writer.write_event(Event::End(style_end)).is_ok());
-      }
-
-      Ok(Event::Empty(mut e)) if e.name().as_ref() == b"defs" => {
-        let mut defs_start = BytesStart::new("defs");
-        assert!(
-          writer.write_event(Event::Start(defs_start)).is_ok()
-        );
-
-        let mut defs_end = BytesEnd::new("defs");
-        assert!(writer.write_event(Event::End(defs_end)).is_ok());
+        if !styles_added {
+          styles_added = true;
+          let mut style_start = BytesStart::new("style");
+          assert!(
+            writer.write_event(Event::Start(style_start)).is_ok()
+          );
+          let mut cdata =
+            BytesCData::new(include_str!("styles.css"));
+          assert!(writer.write_event(Event::CData(cdata)).is_ok());
+          let mut style_end = BytesEnd::new("style");
+          assert!(
+            writer.write_event(Event::End(style_end)).is_ok()
+          );
+        }
       }
 
       Ok(Event::Empty(mut e)) if e.name().as_ref() == b"path" => {
@@ -88,12 +100,7 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
 
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
-        let to_move = [
-          "stroke-width",
-          "stroke-linecap",
-          "stroke-linejoin",
-          "d",
-        ];
+        let to_move = ["stroke-width", "d"];
         e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
