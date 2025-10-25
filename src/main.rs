@@ -19,7 +19,7 @@ fn main() {
   );
   let out_dir = PathBuf::from(
     "content/svgs/output",
-    //"/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs",
+    // "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs",
   );
   let extensions = vec!["svg"];
   let paths =
@@ -27,9 +27,14 @@ fn main() {
   paths.iter().for_each(|pair| {
     // dbg!(&pair);
     let scrubbed = scrub_svg(&pair.0).unwrap();
-    write_file_with_mkdir(&pair.1, &scrubbed);
+    let prepped = prep_svg(&scrubbed);
+    // write_file_with_mkdir(&pair.1, &scrubbed);
   });
   println!("Done");
+}
+
+pub fn prep_svg(content: &String) -> Result<String> {
+  Ok("".to_string())
 }
 
 pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
@@ -38,13 +43,10 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
   let mut reader = Reader::from_str(&content);
   reader.config_mut().trim_text(true);
   let mut writer = Writer::new(Cursor::new(Vec::new()));
-
   let id = format!("svg-{}", Uuid::new_v4());
   let styles = include_str!("styles.css").replace("SVG_ID", &id);
-
   let mut remove_content = false;
   let mut styles_added = false;
-
   loop {
     match reader.read_event() {
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"g" => {
@@ -69,13 +71,15 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
           "y",
           sizer.rect_y().as_str(),
         )));
-        r_start.push_attribute(Attribute::from(("rx", "2%")));
-        r_start.push_attribute(Attribute::from(("ry", "2%")));
-        r_start.push_attribute(Attribute::from(("fill", "blue")));
+        r_start.push_attribute(Attribute::from(("rx", "1%")));
+        r_start.push_attribute(Attribute::from(("ry", "1%")));
+        r_start.push_attribute(Attribute::from((
+          "fill",
+          "rebeccapurple",
+        )));
         assert!(writer.write_event(Event::Start(r_start)).is_ok());
         let mut r_end = BytesEnd::new("rect");
         assert!(writer.write_event(Event::End(r_end)).is_ok());
-
         let mut elem = BytesStart::new("g");
         let to_move = ["transform"];
         e.attributes().for_each(|attr| {
@@ -88,11 +92,9 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
         });
         assert!(writer.write_event(Event::Start(elem)).is_ok());
       }
-
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"svg" => {
         let mut elem = BytesStart::new("svg");
         let to_move = ["version", "xmlns"];
-
         e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
@@ -111,24 +113,20 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
             }
           }
         });
-
-        dbg!(sizer.f_width());
-        dbg!(sizer.f_height());
+        // dbg!(sizer.f_width());
+        // dbg!(sizer.f_height());
         elem.push_attribute(Attribute::from((
           "width",
           sizer.svg_width().as_str(),
         )));
-
         elem.push_attribute(Attribute::from((
           "height",
           sizer.svg_height().as_str(),
         )));
-
         elem.push_attribute(Attribute::from((
           "viewBox",
           sizer.view_box().as_str(),
         )));
-
         let id_attr = Attribute::from(("id", id.as_str()));
         elem.push_attribute(id_attr);
         assert!(writer.write_event(Event::Start(elem)).is_ok());
@@ -146,10 +144,9 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
           );
         }
       }
-
       Ok(Event::Empty(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
-        let to_move = ["stroke-width", "d", "stroke"];
+        let to_move = ["stroke-width", "d", "stroke", "fill"];
         e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
@@ -160,10 +157,9 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
         });
         assert!(writer.write_event(Event::Empty(elem)).is_ok());
       }
-
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
-        let to_move = ["stroke-width", "d"];
+        let to_move = ["stroke-width", "d", "stroke", "fill"];
         e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
@@ -174,7 +170,6 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
         });
         assert!(writer.write_event(Event::Start(elem)).is_ok());
       }
-
       Ok(Event::Empty(e)) if e.name().as_ref() == b"title" => {}
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"title" => {
         remove_content = true;
@@ -185,7 +180,6 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
         remove_content = false;
         assert!(writer.write_event(Event::End(e)).is_ok());
       }
-
       Ok(Event::Empty(e)) if e.name().as_ref() == b"desc" => {}
       Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {
         remove_content = true;
@@ -193,7 +187,6 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
       Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {
         remove_content = false;
       }
-
       Ok(Event::Empty(e)) if e.name().as_ref() == b"defs" => {}
       Ok(Event::Start(e)) if e.name().as_ref() == b"defs" => {
         remove_content = true;
@@ -201,7 +194,6 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
       Ok(Event::End(e)) if e.name().as_ref() == b"defs" => {
         remove_content = false;
       }
-
       //Ok(Event::Start(e)) if e.name().as_ref() == b"title" => {
       //   // let mut elem = BytesStart::new("my_elem");
       //   // elem.extend_attributes(
@@ -210,7 +202,6 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
       //   // elem.push_attribute(("my-key", "some value"));
       //   assert!(writer.write_event(Event::Start(e)).is_ok());
       // }
-
       // Ok(Event::Start(e)) if e.name().as_ref() == b"this_tag" => {
       //   let mut elem = BytesStart::new("my_elem");
       //   elem.extend_attributes(
@@ -220,18 +211,14 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
       //   assert!(writer.write_event(Event::Start(elem)).is_ok());
       // }
       Ok(Event::Comment(_)) => {}
-
       Ok(Event::Empty(e))
         if e.name().as_ref() == b"sodipodi:namedview" => {}
-
       Ok(Event::Eof) => break,
-
       Ok(e) => {
         if !remove_content {
           assert!(writer.write_event(e).is_ok())
         }
       }
-
       Err(e) => panic!(
         "Error at position {}: {:?}",
         reader.error_position(),
