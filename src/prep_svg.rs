@@ -21,7 +21,6 @@ pub fn prep_svg(content: &str) -> Result<String> {
   let id = format!("svg-{}", Uuid::new_v4());
   let styles =
     include_str!("text/styles.css").replace("SVG_ID", &id);
-  let defs = include_str!("text/defs.xml");
   let mut remove_content = false;
   let mut styles_added = false;
   loop {
@@ -88,12 +87,11 @@ pub fn prep_svg(content: &str) -> Result<String> {
           .push_attribute(Attribute::from(("rx", "0.8%")));
         filter_start
           .push_attribute(Attribute::from(("ry", "0.8%")));
-
         filter_start
           .push_attribute(Attribute::from(("fill", "#000000")));
         filter_start.push_attribute(Attribute::from((
           "filter",
-          "url(#nnnoise-filter)",
+          "url(#noise-filter)",
         )));
         let mut filter_end = BytesEnd::new("rect");
 
@@ -155,6 +153,15 @@ pub fn prep_svg(content: &str) -> Result<String> {
         )));
         assert!(writer.write_event(Event::Start(el)).is_ok());
 
+        let defs = include_str!("text/defs.xml")
+          .replace(
+            "FILTER_X",
+            &sizer.f_vb_min_x_adjusted().to_string(),
+          )
+          .replace(
+            "FILTER_Y",
+            &sizer.f_vb_min_y_adjusted().to_string(),
+          );
         let raw_text = BytesText::from_escaped(defs);
 
         assert!(writer.write_event(Event::Text(raw_text)).is_ok());

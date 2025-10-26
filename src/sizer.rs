@@ -90,6 +90,14 @@ impl Sizer {
     self.vb_parts()[1]
   }
 
+  pub fn f_vb_min_x_adjusted(&self) -> f32 {
+    self.f_vb_min_x() - (self.width_adjust() / 2.0)
+  }
+
+  pub fn f_vb_min_y_adjusted(&self) -> f32 {
+    self.f_vb_min_y() - (self.height_adjust() / 2.0)
+  }
+
   pub fn f_vb_width(&self) -> f32 {
     self.vb_parts()[2]
   }
