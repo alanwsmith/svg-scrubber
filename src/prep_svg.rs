@@ -24,14 +24,12 @@ pub fn prep_svg(content: &str) -> Result<String> {
     match reader.read_event() {
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"g" => {
         let mut g2_start = BytesStart::new("g");
-
         // g2_start.push_attribute(
         //   e.attributes()
         //     .find(|a| a.as_ref().unwrap().key.0 == b"transform")
         //     .unwrap()
         //     .unwrap(),
         // );
-
         let mut g2_end = BytesEnd::new("g");
         assert!(writer.write_event(Event::Start(g2_start)).is_ok());
 
@@ -56,12 +54,10 @@ pub fn prep_svg(content: &str) -> Result<String> {
           "y",
           sizer.rect_y().as_str(),
         )));
-        r_start.push_attribute(Attribute::from(("rx", "1%")));
-        r_start.push_attribute(Attribute::from(("ry", "1%")));
-        r_start.push_attribute(Attribute::from((
-          "fill",
-          "rebeccapurple",
-        )));
+        r_start.push_attribute(Attribute::from(("rx", "2%")));
+        r_start.push_attribute(Attribute::from(("ry", "2%")));
+        r_start
+          .push_attribute(Attribute::from(("fill", "#e0c9a6")));
         assert!(writer.write_event(Event::Start(r_start)).is_ok());
         let mut r_end = BytesEnd::new("rect");
         assert!(writer.write_event(Event::End(r_end)).is_ok());
@@ -69,6 +65,16 @@ pub fn prep_svg(content: &str) -> Result<String> {
         assert!(writer.write_event(Event::End(g2_end)).is_ok());
         e.push_attribute(Attribute::from(("fill", "none")));
         e.push_attribute(Attribute::from(("stroke", "black")));
+        e.push_attribute(Attribute::from(("opacity", "1")));
+        e.push_attribute(Attribute::from(("stroke-opacity", "1")));
+        e.push_attribute(Attribute::from((
+          "stroke-linecap",
+          "round",
+        )));
+        e.push_attribute(Attribute::from((
+          "stroke-linejoin",
+          "round",
+        )));
         assert!(writer.write_event(Event::Start(e)).is_ok());
       }
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"svg" => {
