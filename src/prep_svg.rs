@@ -23,6 +23,18 @@ pub fn prep_svg(content: &str) -> Result<String> {
   loop {
     match reader.read_event() {
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"g" => {
+        let mut g2_start = BytesStart::new("g");
+        g2_start.push_attribute(
+          e.attributes()
+            .find(|a| a.as_ref().unwrap().key.0 == b"transform")
+            .unwrap()
+            .unwrap(),
+        );
+
+        let mut g2_end = BytesEnd::new("g");
+        assert!(writer.write_event(Event::Start(g2_start)).is_ok());
+        assert!(writer.write_event(Event::End(g2_end)).is_ok());
+
         /*
                 let mut r_start = BytesStart::new("rect");
                 r_start.push_attribute(Attribute::from((
@@ -55,6 +67,7 @@ pub fn prep_svg(content: &str) -> Result<String> {
                 let mut r_end = BytesEnd::new("rect");
                 assert!(writer.write_event(Event::End(r_end)).is_ok());
         */
+
         e.push_attribute(Attribute::from(("fill", "none")));
         e.push_attribute(Attribute::from(("stroke", "black")));
         assert!(writer.write_event(Event::Start(e)).is_ok());
@@ -122,68 +135,15 @@ pub fn prep_svg(content: &str) -> Result<String> {
         });
         assert!(writer.write_event(Event::Empty(elem)).is_ok());
       }
-      Ok(Event::Start(mut e)) if e.name().as_ref() == b"path" => {
-        let mut elem = BytesStart::new("path");
-        let to_move = ["stroke-width", "d", "stroke", "fill"];
-        e.attributes().for_each(|attr| {
-          if let Ok(a) = attr {
-            let check_it = String::from_utf8_lossy(a.key.0);
-            if to_move.contains(&check_it.to_string().as_str()) {
-              elem.push_attribute(a);
-            }
-          }
-        });
-        assert!(writer.write_event(Event::Start(elem)).is_ok());
-      }
-      Ok(Event::Empty(e)) if e.name().as_ref() == b"title" => {}
-      Ok(Event::Start(mut e)) if e.name().as_ref() == b"title" => {
-        remove_content = true;
-        e.clear_attributes();
-        assert!(writer.write_event(Event::Start(e)).is_ok());
-      }
-      Ok(Event::End(e)) if e.name().as_ref() == b"title" => {
-        remove_content = false;
-        assert!(writer.write_event(Event::End(e)).is_ok());
-      }
-      Ok(Event::Empty(e)) if e.name().as_ref() == b"desc" => {}
-      Ok(Event::Start(e)) if e.name().as_ref() == b"desc" => {
-        remove_content = true;
-      }
-      Ok(Event::End(e)) if e.name().as_ref() == b"desc" => {
-        remove_content = false;
-      }
-      Ok(Event::Empty(e)) if e.name().as_ref() == b"defs" => {}
-      Ok(Event::Start(e)) if e.name().as_ref() == b"defs" => {
-        remove_content = true;
-      }
-      Ok(Event::End(e)) if e.name().as_ref() == b"defs" => {
-        remove_content = false;
-      }
-      //Ok(Event::Start(e)) if e.name().as_ref() == b"title" => {
-      //   // let mut elem = BytesStart::new("my_elem");
-      //   // elem.extend_attributes(
-      //   //   e.attributes().map(|attr| attr.unwrap()),
-      //   // );
-      //   // elem.push_attribute(("my-key", "some value"));
-      //   assert!(writer.write_event(Event::Start(e)).is_ok());
-      // }
-      // Ok(Event::Start(e)) if e.name().as_ref() == b"this_tag" => {
-      //   let mut elem = BytesStart::new("my_elem");
-      //   elem.extend_attributes(
-      //     e.attributes().map(|attr| attr.unwrap()),
-      //   );
-      //   elem.push_attribute(("my-key", "some value"));
-      //   assert!(writer.write_event(Event::Start(elem)).is_ok());
-      // }
-      Ok(Event::Comment(_)) => {}
-      Ok(Event::Empty(e))
-        if e.name().as_ref() == b"sodipodi:namedview" => {}
+
       Ok(Event::Eof) => break,
+
       Ok(e) => {
         if !remove_content {
           assert!(writer.write_event(e).is_ok())
         }
       }
+
       Err(e) => panic!(
         "Error at position {}: {:?}",
         reader.error_position(),
