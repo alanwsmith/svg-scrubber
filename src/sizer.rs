@@ -65,11 +65,11 @@ impl Sizer {
   }
 
   pub fn f_width(&self) -> f32 {
-    self.float_value(&self.width.as_ref().unwrap())
+    self.float_value(self.width.as_ref().unwrap())
   }
 
   pub fn f_height(&self) -> f32 {
-    self.float_value(&self.height.as_ref().unwrap())
+    self.float_value(self.height.as_ref().unwrap())
   }
 
   pub fn vb_parts(&self) -> Vec<f32> {
@@ -100,7 +100,7 @@ impl Sizer {
 
   pub fn float_value(
     &self,
-    input: &String,
+    input: &str,
   ) -> f32 {
     input.replace("pt", "").parse::<f32>().unwrap()
   }
