@@ -16,8 +16,6 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
   let mut reader = Reader::from_str(&content);
   reader.config_mut().trim_text(true);
   let mut writer = Writer::new(Cursor::new(Vec::new()));
-  let id = format!("svg-{}", Uuid::new_v4());
-  let styles = include_str!("styles.css").replace("SVG_ID", &id);
   let mut remove_content = false;
   let mut styles_added = false;
   loop {

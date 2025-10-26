@@ -1,25 +1,29 @@
 #SVG_ID {
   --backup-svg-note-default-stroke-color: black;
   --backup-svg-note-default-fill-color: black;
+  --backup-svg-note-default-background-color: #e5e5db;
 }
 
 @media (prefers-color-scheme: dark) {
   #SVG_ID {
-    --backup-svg-note-default-stroke-color: white;
-    --backup-svg-note-default-fill-color: white;
+    --backup-svg-note-default-stroke-color: black;
+    --backup-svg-note-default-fill-color: black;
+    --backup-svg-note-default-background-color: #e5e5db;
   }
+}
+
+#SVG_ID .svg-note-default-background-color {
+  fill: var(--backup-svg-note-default-background-color);
 }
 
 #SVG_ID path {
   stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 #SVG_ID circle {
   stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
   fill: var(--svg-note-default-fill-color, var(--backup-svg-note-default-fill-color));
 }
+
 
 

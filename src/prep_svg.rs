@@ -2,7 +2,9 @@
 use crate::sizer::Sizer;
 use anyhow::Result;
 use quick_xml::events::attributes::Attribute;
-use quick_xml::events::{BytesCData, BytesEnd, BytesStart, Event};
+use quick_xml::events::{
+  BytesCData, BytesEnd, BytesStart, BytesText, Event,
+};
 use quick_xml::reader::Reader;
 use quick_xml::writer::Writer;
 use regex::Regex;
@@ -17,7 +19,9 @@ pub fn prep_svg(content: &str) -> Result<String> {
   reader.config_mut().trim_text(true);
   let mut writer = Writer::new(Cursor::new(Vec::new()));
   let id = format!("svg-{}", Uuid::new_v4());
-  let styles = include_str!("styles.css").replace("SVG_ID", &id);
+  let styles =
+    include_str!("text/styles.css").replace("SVG_ID", &id);
+  let defs = include_str!("text/defs.xml");
   let mut remove_content = false;
   let mut styles_added = false;
   loop {
@@ -35,10 +39,6 @@ pub fn prep_svg(content: &str) -> Result<String> {
 
         let mut r_start = BytesStart::new("rect");
         r_start.push_attribute(Attribute::from((
-          "class",
-          "svg-note-background",
-        )));
-        r_start.push_attribute(Attribute::from((
           "width",
           sizer.rect_width().as_str(),
         )));
@@ -54,13 +54,53 @@ pub fn prep_svg(content: &str) -> Result<String> {
           "y",
           sizer.rect_y().as_str(),
         )));
-        r_start.push_attribute(Attribute::from(("rx", "2%")));
-        r_start.push_attribute(Attribute::from(("ry", "2%")));
+        r_start.push_attribute(Attribute::from(("rx", "0.8%")));
+        r_start.push_attribute(Attribute::from(("ry", "0.8%")));
         r_start
-          .push_attribute(Attribute::from(("fill", "#e0c9a6")));
-        assert!(writer.write_event(Event::Start(r_start)).is_ok());
+          .push_attribute(Attribute::from(("fill", "#e5e5db")));
+        r_start.push_attribute(Attribute::from((
+          "class",
+          "svg-note-default-background-color",
+        )));
         let mut r_end = BytesEnd::new("rect");
+
+        assert!(writer.write_event(Event::Start(r_start)).is_ok());
         assert!(writer.write_event(Event::End(r_end)).is_ok());
+
+        let mut filter_start = BytesStart::new("rect");
+        filter_start.push_attribute(Attribute::from((
+          "width",
+          sizer.rect_width().as_str(),
+        )));
+        filter_start.push_attribute(Attribute::from((
+          "height",
+          sizer.rect_height().as_str(),
+        )));
+        filter_start.push_attribute(Attribute::from((
+          "x",
+          sizer.rect_x().as_str(),
+        )));
+        filter_start.push_attribute(Attribute::from((
+          "y",
+          sizer.rect_y().as_str(),
+        )));
+        filter_start
+          .push_attribute(Attribute::from(("rx", "0.8%")));
+        filter_start
+          .push_attribute(Attribute::from(("ry", "0.8%")));
+
+        filter_start
+          .push_attribute(Attribute::from(("fill", "#000000")));
+        filter_start.push_attribute(Attribute::from((
+          "filter",
+          "url(#nnnoise-filter)",
+        )));
+        let mut filter_end = BytesEnd::new("rect");
+
+        assert!(
+          writer.write_event(Event::Start(filter_start)).is_ok()
+        );
+        assert!(writer.write_event(Event::End(filter_end)).is_ok());
 
         assert!(writer.write_event(Event::End(g2_end)).is_ok());
         e.push_attribute(Attribute::from(("fill", "none")));
@@ -94,6 +134,7 @@ pub fn prep_svg(content: &str) -> Result<String> {
           }
         });
         let mut el = BytesStart::new("svg");
+        el.push_attribute(Attribute::from(("class", "svg-note")));
         let id_attr = Attribute::from(("id", id.as_str()));
         el.push_attribute(id_attr);
         el.push_attribute(Attribute::from((
@@ -113,6 +154,11 @@ pub fn prep_svg(content: &str) -> Result<String> {
           "http://www.w3.org/2000/svg",
         )));
         assert!(writer.write_event(Event::Start(el)).is_ok());
+
+        let raw_text = BytesText::from_escaped(defs);
+
+        assert!(writer.write_event(Event::Text(raw_text)).is_ok());
+
         if !styles_added {
           styles_added = true;
           let mut style_start = BytesStart::new("style");
