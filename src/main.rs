@@ -16,12 +16,12 @@ use walkdir::WalkDir;
 fn main() {
   println!("Starting...");
   let in_dir = PathBuf::from(
-    "content/svgs/input",
-    // "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs-raw-notes",
+    //    "content/svgs/input",
+    "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs-raw-notes",
   );
   let out_dir = PathBuf::from(
-    "content/svgs/output",
-    // "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs",
+    //"content/svgs/output",
+    "/Users/alan/Documents/Neopoligen/alanwsmith.com/svgs",
   );
   let extensions = vec!["svg"];
   let paths =

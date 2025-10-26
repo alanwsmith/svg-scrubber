@@ -1,4 +1,4 @@
-<svg class="svg-note" id="svg-d5a98ff8-fc60-479c-9dfa-272be575e608" width="603.7828" height="481.75534" viewBox="-342.613 517.069 703.7828 561.7554" xmlns="http://www.w3.org/2000/svg">  <defs>
+<svg class="svg-note" id="svg-d4a9f985-120d-440e-bc3f-46e92e9e1f68" width="603.7828" height="481.75534" viewBox="-342.613 517.069 703.7828 561.7554" xmlns="http://www.w3.org/2000/svg">  <defs>
   <filter id="noise-filter" 
     x="-20%" y="-20%" width="140%" height="140%"
     filterUnits="objectBoundingBox"
@@ -16,29 +16,29 @@
     </filter>
   </defs>
 
-<style><![CDATA[#svg-d5a98ff8-fc60-479c-9dfa-272be575e608 {
+<style><![CDATA[#svg-d4a9f985-120d-440e-bc3f-46e92e9e1f68 {
   --backup-svg-note-default-stroke-color: black;
   --backup-svg-note-default-fill-color: black;
   --backup-svg-note-default-background-color: #e5e5db;
 }
 
 @media (prefers-color-scheme: dark) {
-  #svg-d5a98ff8-fc60-479c-9dfa-272be575e608 {
+  #svg-d4a9f985-120d-440e-bc3f-46e92e9e1f68 {
     --backup-svg-note-default-stroke-color: black;
     --backup-svg-note-default-fill-color: black;
     --backup-svg-note-default-background-color: #e5e5db;
   }
 }
 
-#svg-d5a98ff8-fc60-479c-9dfa-272be575e608 .svg-note-default-background-color {
+#svg-d4a9f985-120d-440e-bc3f-46e92e9e1f68 .svg-note-default-background-color {
   fill: var(--backup-svg-note-default-background-color);
 }
 
-#svg-d5a98ff8-fc60-479c-9dfa-272be575e608 path {
+#svg-d4a9f985-120d-440e-bc3f-46e92e9e1f68 path {
   stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
 }
 
-#svg-d5a98ff8-fc60-479c-9dfa-272be575e608 circle {
+#svg-d4a9f985-120d-440e-bc3f-46e92e9e1f68 circle {
   stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
   fill: var(--svg-note-default-fill-color, var(--backup-svg-note-default-fill-color));
 }

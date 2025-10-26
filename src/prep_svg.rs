@@ -53,8 +53,8 @@ pub fn prep_svg(content: &str) -> Result<String> {
           "y",
           sizer.rect_y().as_str(),
         )));
-        r_start.push_attribute(Attribute::from(("rx", "0.8%")));
-        r_start.push_attribute(Attribute::from(("ry", "0.8%")));
+        r_start.push_attribute(Attribute::from(("rx", "1.4%")));
+        r_start.push_attribute(Attribute::from(("ry", "1.4%")));
         r_start
           .push_attribute(Attribute::from(("fill", "#e5e5db")));
         r_start.push_attribute(Attribute::from((
