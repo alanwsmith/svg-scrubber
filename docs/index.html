@@ -2078,11 +2078,19 @@ window.bittyFunctions = {
   bittyInit() {
     this.api.fn.setProp("--load-hider", "1");
     this.api.forward(null, "svg");
+    this.api.forward(null, "svg2");
   }
 
   async svg(_event, el) {
     const newSvg = await this.api.getSVG(
       "/svgs/output/for-example-this-one.svg",
+    );
+    el.appendChild(newSvg.ok);
+  }
+
+  async svg2(_event, el) {
+    const newSvg = await this.api.getSVG(
+      "/svgs/filter-test/1.svg",
     );
     el.appendChild(newSvg.ok);
   }
@@ -2116,6 +2124,8 @@ window.bittyFunctions = {
       </header>
 
       <main class="default-wrapper default-flow">
+
+
 <p>This is a little rust app that scrubs SVGs
   that come out of the 
   <a href="https://concepts.app/en/">Concepts</a> app
@@ -2135,22 +2145,22 @@ window.bittyFunctions = {
 <p>TODO: Updated the title tag with the name of the file</p>
 </li>
 <li>
-<p>TODO: Added a UUID to each SVG.</p>
-</li>
-<li>
-<p>TODO: Styles are only applied to the UUID
-for the parent SVG.</p>
-</li>
-<li>
-<p>TODO: Added padding to viewBox.</p>
-</li>
-<li>
-<p>TODO:Add an opaque background color.</p>
-</li>
-<li>
 <p>TODO: Read a .txt file with the same
 name and use it as the description
 for the SVG</p>
+</li>
+<li>
+<p>Added padding to viewBox.</p>
+</li>
+<li>
+<p>Add an opaque background color with some texture.</p>
+</li>
+<li>
+<p>Added a UUID to each SVG.</p>
+</li>
+<li>
+<p>Styles are only applied to the UUID
+for the parent SVG.</p>
 </li>
 <li>
 <p>Removed cruft attributes from svg element.</p>
@@ -2160,11 +2170,8 @@ for the SVG</p>
 with backups for light and dark mode.</p>
 </li>
 <li>
-<p>Remove hard coded stroke and fill on
-paths and circles. (tbd on rects)</p>
-</li>
-<li>
-<p>Removed id attribute from the g tag</p>
+<p>Updated hard coded color values as
+fallbacks for when CSS fails</p>
 </li>
 </ul>
       </main>
