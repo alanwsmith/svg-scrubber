@@ -51,7 +51,7 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
 
       Ok(Event::Empty(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
-        let to_move = ["stroke-width", "d"];
+        let to_move = ["stroke-width", "d", "stroke", "fill"];
         e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);
@@ -65,7 +65,7 @@ pub fn scrub_svg(in_path: &PathBuf) -> Result<String> {
 
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"path" => {
         let mut elem = BytesStart::new("path");
-        let to_move = ["stroke-width", "d"];
+        let to_move = ["stroke-width", "d", "stroke", "fill"];
         e.attributes().for_each(|attr| {
           if let Ok(a) = attr {
             let check_it = String::from_utf8_lossy(a.key.0);

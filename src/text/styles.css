@@ -1,3 +1,5 @@
+/*
+*
 #SVG_ID {
   --backup-svg-note-default-stroke-color: black;
   --backup-svg-note-default-fill-color: black;
@@ -25,5 +27,6 @@
   fill: var(--svg-note-default-fill-color, var(--backup-svg-note-default-fill-color));
 }
 
+*/
 
 
