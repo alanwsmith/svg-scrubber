@@ -24,50 +24,49 @@ pub fn prep_svg(content: &str) -> Result<String> {
     match reader.read_event() {
       Ok(Event::Start(mut e)) if e.name().as_ref() == b"g" => {
         let mut g2_start = BytesStart::new("g");
-        g2_start.push_attribute(
-          e.attributes()
-            .find(|a| a.as_ref().unwrap().key.0 == b"transform")
-            .unwrap()
-            .unwrap(),
-        );
+
+        // g2_start.push_attribute(
+        //   e.attributes()
+        //     .find(|a| a.as_ref().unwrap().key.0 == b"transform")
+        //     .unwrap()
+        //     .unwrap(),
+        // );
 
         let mut g2_end = BytesEnd::new("g");
         assert!(writer.write_event(Event::Start(g2_start)).is_ok());
+
+        let mut r_start = BytesStart::new("rect");
+        r_start.push_attribute(Attribute::from((
+          "class",
+          "svg-note-background",
+        )));
+        r_start.push_attribute(Attribute::from((
+          "width",
+          sizer.rect_width().as_str(),
+        )));
+        r_start.push_attribute(Attribute::from((
+          "height",
+          sizer.rect_height().as_str(),
+        )));
+        r_start.push_attribute(Attribute::from((
+          "x",
+          sizer.rect_x().as_str(),
+        )));
+        r_start.push_attribute(Attribute::from((
+          "y",
+          sizer.rect_y().as_str(),
+        )));
+        r_start.push_attribute(Attribute::from(("rx", "1%")));
+        r_start.push_attribute(Attribute::from(("ry", "1%")));
+        r_start.push_attribute(Attribute::from((
+          "fill",
+          "rebeccapurple",
+        )));
+        assert!(writer.write_event(Event::Start(r_start)).is_ok());
+        let mut r_end = BytesEnd::new("rect");
+        assert!(writer.write_event(Event::End(r_end)).is_ok());
+
         assert!(writer.write_event(Event::End(g2_end)).is_ok());
-
-        /*
-                let mut r_start = BytesStart::new("rect");
-                r_start.push_attribute(Attribute::from((
-                  "class",
-                  "svg-note-background",
-                )));
-                r_start.push_attribute(Attribute::from((
-                  "width",
-                  sizer.rect_width().as_str(),
-                )));
-                r_start.push_attribute(Attribute::from((
-                  "height",
-                  sizer.rect_height().as_str(),
-                )));
-                r_start.push_attribute(Attribute::from((
-                  "x",
-                  sizer.rect_x().as_str(),
-                )));
-                r_start.push_attribute(Attribute::from((
-                  "y",
-                  sizer.rect_y().as_str(),
-                )));
-                r_start.push_attribute(Attribute::from(("rx", "1%")));
-                r_start.push_attribute(Attribute::from(("ry", "1%")));
-                r_start.push_attribute(Attribute::from((
-                  "fill",
-                  "rebeccapurple",
-                )));
-                assert!(writer.write_event(Event::Start(r_start)).is_ok());
-                let mut r_end = BytesEnd::new("rect");
-                assert!(writer.write_event(Event::End(r_end)).is_ok());
-        */
-
         e.push_attribute(Attribute::from(("fill", "none")));
         e.push_attribute(Attribute::from(("stroke", "black")));
         assert!(writer.write_event(Event::Start(e)).is_ok());
