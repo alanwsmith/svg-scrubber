@@ -1,23 +1,23 @@
-<svg width="603.78278pt" height="481.75534pt" version="1.1" viewBox="-292.613 557.069 603.78278 481.75536" xmlns="http://www.w3.org/2000/svg" id="svg-8abe02ef-e773-4d53-8264-7aff6741f90f"><style><![CDATA[#svg-8abe02ef-e773-4d53-8264-7aff6741f90f {
+<svg id="svg-1a6b4113-5e1e-4374-a59b-eb5878036494" width="603.7828" height="481.75534" viewBox="-342.613 517.069 703.7828 561.7554" xmlns="http://www.w3.org/2000/svg"><style><![CDATA[#svg-1a6b4113-5e1e-4374-a59b-eb5878036494 {
   --backup-svg-note-default-stroke-color: black;
   --backup-svg-note-default-fill-color: black;
 }
 
 @media (prefers-color-scheme: dark) {
-  #svg-8abe02ef-e773-4d53-8264-7aff6741f90f {
+  #svg-1a6b4113-5e1e-4374-a59b-eb5878036494 {
     --backup-svg-note-default-stroke-color: white;
     --backup-svg-note-default-fill-color: white;
   }
 }
 
-#svg-8abe02ef-e773-4d53-8264-7aff6741f90f path {
+#svg-1a6b4113-5e1e-4374-a59b-eb5878036494 path {
   stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-#svg-8abe02ef-e773-4d53-8264-7aff6741f90f circle {
+#svg-1a6b4113-5e1e-4374-a59b-eb5878036494 circle {
   stroke: var(--svg-note-default-stroke-color, var(--backup-svg-note-default-stroke-color));
   fill: var(--svg-note-default-fill-color, var(--backup-svg-note-default-fill-color));
 }
